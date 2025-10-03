@@ -8,10 +8,13 @@ export default function Game() {
 
   useEffect(() => {
     if (scriptsLoadedRef.current) return;
-    scriptsLoadedRef.current = true;
 
     const loadScript = (src: string): Promise<void> => {
       return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) {
+          resolve();
+          return;
+        }
         const script = document.createElement('script');
         script.src = src;
         script.async = false;
@@ -64,13 +67,15 @@ export default function Game() {
 
     const loadAllScripts = async () => {
       try {
+        scriptsLoadedRef.current = true;
+
         for (const script of scripts) {
           await loadScript(script);
         }
 
         const jquery = (window as any).$;
         if (jquery) {
-          jquery(document).ready(function () {
+          const initGame = () => {
             const CMain = (window as any).CMain;
             if (CMain) {
               const oMain = new CMain({
@@ -153,7 +158,13 @@ export default function Game() {
                 if (sizeHandler) sizeHandler();
               }
             }
-          });
+          };
+
+          if (document.readyState === 'complete') {
+            initGame();
+          } else {
+            jquery(document).ready(initGame);
+          }
         }
       } catch (error) {
         console.error('Error loading game scripts:', error);

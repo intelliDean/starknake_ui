@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 const GameComponent = dynamic(() => import('@/components/Game'), {
